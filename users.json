@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "User one",
+    "location": "Nigeria"
+  },
+  {
+    "id": 2,
+    "name": "User two",
+    "location": "Philipine"
+  },
+  {
+    "id": 3,
+    "name": "User three",
+    "location": "Argentina"
+  },
+  {
+    "id": 4,
+    "name": "User four",
+    "location": "London"
+  },
+  {
+    "id": 5,
+    "name": "User five",
+    "location": "United States"
+  },
+  {
+    "id": 6,
+    "name": "User six",
+    "location": "Ghana"
+  },
+  {
+    "id": 7,
+    "name": "User seven",
+    "location": "Rwanda"
+  },
+  {
+    "id": 8,
+    "name": "User eight",
+    "location": "Egypt"
+  },
+  {
+    "id": 9,
+    "name": "User nine",
+    "location": "South Africa"
+  },
+  {
+    "id": 10,
+    "name": "User ten",
+    "location": "Canada"
+  }
+]

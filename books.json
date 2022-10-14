@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "Book one",
+    "user": 4
+  },
+  {
+    "id": 2,
+    "name": "Book two",
+    "user": 2
+  },
+  {
+    "id": 3,
+    "name": "Book three",
+    "user": 7
+  },
+  {
+    "id": 4,
+    "name": "Book four",
+    "user": 1
+  },
+  {
+    "id": 5,
+    "name": "Book five",
+    "user": 6
+  },
+  {
+    "id": 6,
+    "name": "Book six",
+    "user": 10
+  },
+  {
+    "id": 7,
+    "name": "Book seven",
+    "user": 4
+  },
+  {
+    "id": 8,
+    "name": "Book eight",
+    "user": 9
+  },
+  {
+    "id": 9,
+    "name": "Book nine",
+    "user": 5
+  },
+  {
+    "id": 10,
+    "name": "Book ten",
+    "user": 2
+  }
+]
