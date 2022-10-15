@@ -3,53 +3,10 @@ open Printf
 open Cohttp
 open Cohttp_lwt_unix
 
-type user = { id : int; name : string; location : string }
-type book = { id : int; name : string; user : int }
-
-let users_of_json = function
-  | `O
-      [
-        ("id", `Int id); ("name", `String name); ("location", `String location);
-      ] ->
-      { id; name; location }
-  | _ ->
-      Ezjsonm.to_string
-        (`Assoc [ ("success", `String "Welcome to our test API using OCaml!") ])
-
-let books_of_json = function
-  | `O [ ("id", `Int id); ("name", `String name); ("user", `Int user) ] ->
-      { id; name; user }
-  | _ ->
-      Ezjsonm.to_string
-        (`Assoc [ ("success", `String "Welcome to our test API using OCaml!") ])
-
-let get_resorces source =
-  let source_file = open_in (source ^ ".json") in
-  let resorces = Ezjsonm.value_from_channel source_file in
-  close_in source_file;
-  resorces
-
-let users_handler =
-  let users = get_resorces "users" in
-  match users with
-  | `A users -> (
-      try Ok (List.map (fun p -> Ezjsonm.to_string (users_of_json p)) users)
-      with _ ->
-        Ezjsonm.to_string
-          (`Assoc
-            [ ("success", `String "Welcome to our test API using OCaml!") ]))
-  | _ -> Ezjsonm.to_string []
-
-let books_handler =
-  let users = get_resorces "books" in
-  match users with
-  | `A users -> (
-      try Ok (List.map (fun p -> Ezjsonm.to_string (books_of_json p)) users)
-      with _ ->
-        Ezjsonm.to_string
-          (`Assoc
-            [ ("success", `String "Welcome to our test API using OCaml!") ]))
-  | _ -> Ezjsonm.to_string []
+let get_resources source =
+  let source_file = source ^ ".json" in
+  let resources = Yojson.Basic.from_file source_file in
+  resources
 
 let () =
   let on_exn = function
@@ -63,14 +20,16 @@ let () =
     let response =
       match uri with
       | "" | "/" ->
-          Ezjsonm.to_string
-            (`Assoc
-              [ ("success", `String "Welcome to our test API using OCaml!") ])
-      | "/api/users" -> users_handler
-      | "/api/books" -> books_handler
+          let response =
+            `Assoc
+              [ ("success", `String "Welcome to our test API using OCaml!") ]
+          in
+          Yojson.Basic.pretty_to_string response
+      | "/api/users" -> Yojson.Basic.pretty_to_string (get_resources "users")
+      | "/api/books" -> Yojson.Basic.pretty_to_string (get_resources "books")
       | _ ->
-          Ezjsonm.to_string
-            (`Assoc [ ("error", `String "There was an error!") ])
+          let response = `Assoc [ ("error", `String "There was an error!") ] in
+          Yojson.Basic.pretty_to_string response
     in
     let meth = req |> Request.meth |> Code.string_of_method in
     let headers = req |> Request.headers |> Header.to_string in

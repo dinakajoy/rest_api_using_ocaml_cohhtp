@@ -1,0 +1,17 @@
+opam-version: "2.0"
+
+synopsis: "A simple OCaml rest api"
+description: "A simple OCaml REST API server using cohttp that returns list of users and books"
+
+license: "MIT"
+homepage: "https://github.com/dinakajoy/simple_ocaml_rest_api_server"
+bug-reports: "https://github.com/dinakajoy/simple_ocaml_rest_api_server/issues"
+
+author: "Odinaka Joy <dinakajoy@gmail.com>"
+maintainer: "Odinaka Joy <dinakajoy@gmail.com>"
+
+depends: [
+  "dune" {>= "2.8.0"}
+  "ocaml" {>= "4.12.1"}
+  "yojson" {>= "1.7.0"}
+]
