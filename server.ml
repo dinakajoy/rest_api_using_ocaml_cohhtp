@@ -3,7 +3,37 @@ open Printf
 open Cohttp
 open Cohttp_lwt_unix
 
-(* Helper function to load resources from a JSON file *)
+(* Function to get a specific resource by ID *)
+let get_resource_by_id source id =
+  let source_file = source ^ ".json" in
+  try
+    let json = Yojson.Basic.from_file source_file in
+    match json with
+    | `List items ->
+        let result =
+          List.find_opt
+            (fun item ->
+              match item with
+              | `Assoc props ->
+                  (match List.assoc_opt "id" props with
+                  | Some (`String item_id) -> item_id = id
+                  | Some (`Int item_id) -> string_of_int item_id = id
+                  | _ -> false)
+              | _ -> false) items
+        in
+        (match result with
+        | Some item -> item
+        | None ->
+            `Assoc [ ("error", `String ("Resource with id " ^ id ^ " not found")) ])
+    | _ ->
+        `Assoc [ ("error", `String "Invalid JSON structure") ]
+  with
+  | Sys_error msg ->
+      `Assoc [ ("error", `String ("Failed to load resource: " ^ msg)) ]
+  | Yojson.Json_error msg ->
+      `Assoc [ ("error", `String ("Invalid JSON format: " ^ msg)) ]   
+
+(* Function to get all resources *)
 let get_resources source =
   let source_file = source ^ ".json" in
   try
@@ -14,19 +44,28 @@ let get_resources source =
   | Yojson.Json_error msg ->
       `Assoc [ ("error", `String ("Invalid JSON format: " ^ msg)) ]
 
+let split_path uri =
+  Uri.path uri
+  |> String.split_on_char '/'
+  |> List.filter (fun s -> s <> "")
+
 (* Function to handle API routes *)
 let handle_request uri =
-  match uri with
-  | "" | "/" ->
-      `Assoc [ ("success", `String "Welcome to our test API using OCaml!") ]
-  | "/api/users" | "/api/users/" ->
-      get_resources "users"
-  | "/api/books" | "/api/books/" ->
-      get_resources "books"
+  let segments = split_path uri in
+  match segments with
+  | [] ->
+    `Assoc [ ("success", `String "Welcome to our test API using OCaml!") ]
+  | [ "api"; "users" ] ->
+    get_resources "users"
+  | [ "api"; "users"; id ] ->
+    get_resource_by_id "users" id
+  | [ "api"; "books" ] ->
+    get_resources "books"
+  | [ "api"; "books"; id ] ->
+    get_resource_by_id "books" id
   | _ ->
-      `Assoc [ ("error", `String "Invalid endpoint!") ]
+    `Assoc [ ("error", `String "Invalid endpoint!") ]
 
-(* Main server logic *)
 let () =
   let on_exn = function
     | Unix.Unix_error (error, func, arg) ->
@@ -36,14 +75,14 @@ let () =
   in
 
   let callback _conn req body =
-    let uri = req |> Request.resource in
+    let uri = Request.uri req in
     let response_json = handle_request uri in
     let response = Yojson.Basic.pretty_to_string response_json in
     let meth = req |> Request.meth |> Code.string_of_method in
     let headers = req |> Request.headers |> Header.to_string in
   
     (body |> Cohttp_lwt.Body.to_string >|= fun body ->
-      Printf.sprintf "Uri: %s\nMethod: %s\nHeaders\nHeaders: %s\nBody: %s" uri
+      Printf.sprintf "Uri: %s\nMethod: %s\nHeaders\nHeaders: %s\nBody: %s" (Uri.to_string uri)
         meth headers body )
     >>= fun _body -> Server.respond_string ~status:`OK ~body:response ()
   in
